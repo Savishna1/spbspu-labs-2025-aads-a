@@ -8,6 +8,7 @@
 #include <initializer_list>
 #include <stdexcept>
 #include <stack.hpp>
+#include <queue.hpp>
 
 namespace averenkov
 {
@@ -68,6 +69,24 @@ namespace averenkov
 
     bool empty() const noexcept;
     size_t size() const noexcept;
+
+    template< class F >
+    F traverse_lnr(F f) const;
+
+    template< class F >
+    F traverse_rnl(F f) const;
+
+    template< class F >
+    F traverse_breadth(F f) const;
+
+    template< class F >
+    F traverse_lnr(F f);
+
+    template< class F >
+    F traverse_rnl(F f);
+
+    template< class F >
+    F traverse_breadth(F f);
 
   private:
     NodeType* fake_root_;
@@ -826,5 +845,145 @@ namespace averenkov
     }
     return node;
   }
+
+template < class Key, class Value, class Compare >
+  template < typename F >
+  F Tree< Key, Value, Compare >::traverse_lnr(F f) const
+  {
+    Stack< NodeType* > stack;
+    NodeType* current = getRoot();
+    while (current || !stack.empty())
+    {
+      while (current)
+      {
+        stack.push(current);
+        current = current->left;
+      }
+      current = stack.top();
+      stack.pop();
+
+      f(current->data);
+      current = current->right;
+    }
+    return f;
+  }
+
+  template < class Key, class Value, class Compare >
+  template < typename F >
+  F Tree< Key, Value, Compare >::traverse_rnl(F f) const
+  {
+    Stack< NodeType* > stack;
+    NodeType* current = getRoot();
+    while (current || !stack.empty())
+    {
+      while (current)
+      {
+        stack.push(current);
+        current = current->right;
+      }
+      current = stack.top();
+      stack.pop();
+      f(current->data);
+      current = current->left;
+    }
+    return f;
+  }
+
+  template < class Key, class Value, class Compare >
+  template < typename F >
+  F Tree< Key, Value, Compare >::traverse_breadth(F f) const
+  {
+    if (!getRoot())
+    {
+      return f;
+    }
+    Queue< NodeType* > queue;
+    queue.push(getRoot());
+    while (!queue.empty())
+    {
+      NodeType* current = queue.front();
+      queue.pop();
+      f(current->data);
+      if (current->left)
+      {
+        queue.push(current->left);
+      }
+      if (current->right)
+      {
+        queue.push(current->right);
+      }
+    }
+    return f;
+  }
+
+  template < class Key, class Value, class Compare >
+  template < typename F >
+  F Tree< Key, Value, Compare >::traverse_lnr(F f)
+  {
+    Stack< NodeType* > stack;
+    NodeType* current = getRoot();
+    while (current || !stack.empty())
+    {
+      while (current)
+      {
+        stack.push(current);
+        current = current->left;
+      }
+      current = stack.top();
+      stack.pop();
+      f(current->data);
+      current = current->right;
+    }
+    return f;
+  }
+
+  template < class Key, class Value, class Compare >
+  template < typename F >
+  F Tree< Key, Value, Compare >::traverse_rnl(F f)
+  {
+    Stack< NodeType* > stack;
+    NodeType* current = getRoot();
+    while (current || !stack.empty())
+    {
+      while (current)
+      {
+        stack.push(current);
+        current = current->right;
+      }
+      current = stack.top();
+      stack.pop();
+      f(current->data);
+      current = current->left;
+    }
+    return f;
+  }
+
+  template < class Key, class Value, class Compare >
+  template < typename F >
+  F Tree< Key, Value, Compare >::traverse_breadth(F f)
+  {
+    if (!getRoot())
+    {
+      return f;
+    }
+    Queue< NodeType* > queue;
+    queue.push(getRoot());
+    while (!queue.empty())
+    {
+      NodeType* current = queue.front();
+      queue.pop();
+      f(current->data);
+      if (current->left)
+      {
+        queue.push(current->left);
+      }
+      if (current->right)
+      {
+        queue.push(current->right);
+      }
+    }
+    return f;
+  }
+
 }
 #endif
